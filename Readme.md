@@ -4,6 +4,9 @@ This is a GUI for Gopro Hero 4. Using multiple network adapters connected with e
 
 Be sure that every connected gopro has an IP like 10.5.5.* (this could be manually assigned).
 
+![multi gro](http://i4.tietuku.com/bb840f6edbb6c704.jpg  "gopro")
+
+
 ##Dependency
 * tkinter (only linux need to install, python for windows contains tkinter originally)
 * ffmpeg
