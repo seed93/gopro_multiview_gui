@@ -12,7 +12,9 @@ Be sure that every connected gopro has an IP like 10.5.5.* (this could be manual
 * ffmpeg
 
 ##LICENSE
-Anyone can get a copy and be free to distribute
+Please send me an email to get the main file
+
+<a href="mailto:liangding1990@163.com">liangding1990@163.com</a>
 
 ##Reference
 https://github.com/KonradIT/goprowifihack
