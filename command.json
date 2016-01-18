@@ -216,12 +216,23 @@
 			"Trigger": "http://10.5.5.9/gp/gpControl/command/shutter?p=1",
 			"Stop (Video/Timelapse)": "http://10.5.5.9/gp/gpControl/command/shutter?p=0"
 		}
+	},
+	{
+		"name": "Delete",
+		"submenu": {
+			"Last": "http://10.5.5.9/gp/gpControl/command/storage/delete/last",
+			"All": "http://10.5.5.9/gp/gpControl/command/storage/delete/all"
+		}
 	}
 	],
 	"stream": {
 		"start": "http://10.5.5.9/gp/gpControl/execute?p1=gpStream&c1=restart",
 		"stop": "http://10.5.5.9/gp/gpControl/execute?p1=gpStream&c1=stop"
 	},
+	"power_off": "http://10.5.5.9/gp/gpControl/command/system/sleep",
 	"list_file": "http://10.5.5.9:8080/gp/gpMediaList",
-	"file_path": "http://10.5.5.9:8080/videos/DCIM/100GOPRO/"
+	"file_path": "http://10.5.5.9:8080/videos/DCIM/100GOPRO/",
+	"mac_map": {
+		"GoproNumber1": ""
+	}
 }

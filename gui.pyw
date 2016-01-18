@@ -86,7 +86,7 @@ def send_cmd(url):
 		try:
 			result[ip] = opener[ip].open(url, timeout=1).read()
 		except Exception, e:
-			show_message(ip + " failed\n" + str(e))
+			print ip + " failed\n" + str(e)
 	return result
 
 def start_ffmpeg(ip):
@@ -110,6 +110,28 @@ def preview():
 			os.system('taskkill /F /IM ffplay.exe')
 		send_cmd(stream_stop)
 
+def wake_on_lan():
+	for ip in iplist:
+		macaddress = mac_map[ip_to_ssid[ip]]
+		data = ''.join(['FFFFFFFFFFFF', macaddress * 20])
+		send_data = ''
+		# Split up the hex values and pack.
+		for i in range(0, len(data), 2):
+			send_data = ''.join([send_data,
+								 struct.pack('B', int(data[i: i + 2], 16))])
+		# Broadcast it to the LAN.
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+		sock.bind((ip,8080))
+		sock.sendto(send_data, ('10.5.5.9', 9))
+
+def power_change():
+	if ispower.get():
+		wake_on_lan()
+	else:
+		send_cmd(power_off)
+	
+	
 def load_json(filename):
 	try:
 		f = file(cmd_file_name)
@@ -142,7 +164,7 @@ def get_img():
 			if num > len(filelist):
 				num = len(filelist)
 			for file in filelist[-num:]:
-				lastfile = [-1]['n']
+				lastfile = file['n']
 				data = opener[ip].open(get_file_url+lastfile, timeout=5).read()
 				with open(subpath+lastfile, "wb") as code:
 					code.write(data)
@@ -152,6 +174,9 @@ def get_img():
 	show_message('get image done')
 
 def start_server(conn):
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	address = (server_ip, 12345)
+	s.bind(address)
 	s.listen(5)
 	ss, addr = s.accept()
 	print 'got connect from ', addr
@@ -159,6 +184,9 @@ def start_server(conn):
 		ss.send(conn.recv())
 
 def start_client():
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	address = (server_ip, 12345)
+	s.connect(address)
 	while True:
 		data = s.recv(512)
 		print data
@@ -176,6 +204,8 @@ try:
 	get_file_url = js['file_path']
 	server_ip = js['server_ip']
 	isclient = js['isclient']
+	power_off = js['power_off']
+	mac_map = js['mac_map']
 except Exception, e:
 	show_message('insufficient parameters\n' + str(e))
 	exit()
@@ -183,6 +213,9 @@ except Exception, e:
 # get connected gopro
 iplist = find_all_ip()
 print iplist
+ip_to_ssid = {}
+for ip in iplist:
+	ip_to_ssid[ip] = 'GoproNumber%d',int(ip[-2:])
 opener = set_sender(iplist)
 ffmpeg = {}
 
@@ -206,17 +239,11 @@ for item in controls:
 	i = i+1
 
 root.title('gopro controller with %d gopros (%s)' % (len(iplist), isclient))
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-address = (server_ip, 12345)
 if isclient == 'server':
-	s.bind(address)
 	parent_conn, child_conn = Pipe()
 	socket_proc = Process(target=start_server, args=(child_conn,))
-	socket_proc.start()
 elif isclient == 'client':
-	s.connect(address)
 	socket_proc = Process(target=start_client)
-	socket_proc.start()
 
 isprev = IntVar()
 cb = Checkbutton(root, text='preview', variable=isprev, \
@@ -226,13 +253,16 @@ edit = Entry(root)
 edit.grid(row=i+1, column=1)
 bu = Button(root, text='get_last_img', command=get_img)
 bu.grid(row=i+1, column=2)
-
+ispower = IntVar()
+power = Checkbutton(root, text='power', variable=ispower, \
+			onvalue = 1, offvalue = 0, command=power_change)
+power.grid(row=i+1, column=3)
 
 if __name__ == '__main__':
+	socket_proc.start()
 	threading = Process(target=keep_alive)
 	threading.start()
 	root.mainloop()
 	threading.terminate()
 	if isclient:
-		s.close()
 		socket_proc.terminate()
