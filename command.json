@@ -117,18 +117,6 @@
 		}
 	},
 	{
-		"name": "Primary modes",
-		"submenu": {
-			"Auto": "http://10.5.5.9/gp/gpControl/setting/19/0",
-			"2": "http://10.5.5.9/gp/gpControl/setting/19/1",
-			"5": "http://10.5.5.9/gp/gpControl/setting/19/2",
-			"10": "http://10.5.5.9/gp/gpControl/setting/19/3",
-			"15": "http://10.5.5.9/gp/gpControl/setting/19/4",
-			"20": "http://10.5.5.9/gp/gpControl/setting/19/5",
-			"30": "http://10.5.5.9/gp/gpControl/setting/19/6"
-		}
-	},
-	{
 		"name": "Exposure for NightLapse",
 		"submenu": {
 			"Auto": "http://10.5.5.9/gp/gpControl/setting/31/0",
