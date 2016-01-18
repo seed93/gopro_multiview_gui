@@ -76,7 +76,8 @@ def show_message(s):
 
 def control():
 	url = cmd_dict[value.get()]
-	parent_conn.send(url)
+	if isclient == 'server':
+		parent_conn.send(url)
 	send_cmd(url)
 
 def send_cmd(url):
@@ -201,7 +202,7 @@ if isclient == 'server':
 	parent_conn, child_conn = Pipe()
 	socket_proc = Process(target=start_server, args=(child_conn,))
 	socket_proc.start()
-else:
+elif isclient == 'client':
 	s.connect(address)
 	socket_proc = Process(target=start_client)
 	socket_proc.start()
@@ -219,5 +220,6 @@ if __name__ == '__main__':
 	threading.start()
 	root.mainloop()
 	threading.terminate()
-	s.close()
-	socket_proc.terminate()
+	if isclient:
+		s.close()
+		socket_proc.terminate()
