@@ -1,16 +1,17 @@
 #-*- coding: utf-8 -*-
- 
+
 from Tkinter import *
 import tkMessageBox
 import json
 from collections import OrderedDict
 import re
-import sys, os, platform, subprocess, multiprocessing
+import sys, os, platform, subprocess
 import functools, httplib, urllib2, socket
 from threading import Thread
 from time import sleep
+from multiprocessing import Process, Pipe
 import tkFileDialog
-reload(sys) 
+reload(sys)
 sys.setdefaultencoding("utf-8")
 
 class BoundHTTPHandler(urllib2.HTTPHandler):
@@ -42,7 +43,7 @@ def keep_alive():
 			sock.bind((ip,8080))
 			sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 		sleep(KEEP_ALIVE_PERIOD/1000)
-	
+
 def find_all_ip():
 	pf = platform.system()
 	ipstr = '([0-9]{1,3}\.){3}[0-9]{1,3}'
@@ -72,9 +73,10 @@ def find_all_ip():
 
 def show_message(s):
 	tkMessageBox.showinfo("Message", s)
-	
+
 def control():
 	url = cmd_dict[value.get()]
+	parent_conn.send(url)
 	send_cmd(url)
 
 def send_cmd(url):
@@ -85,16 +87,16 @@ def send_cmd(url):
 		except Exception, e:
 			show_message(ip + " failed\n" + str(e))
 	return result
-	
+
 def start_ffmpeg(ip):
-	prefix = "ffplay -fflags nobuffer udp://"
+	prefix = "ffplay -fflags nobuffer -f:v mpegts -probesize 8192 udp://"
 	print prefix + "%s?localaddr=%s" % (ip, ip)
 	os.system(prefix + "%s:8554?localaddr=%s" % (ip, ip))
 
 def preview():
 	if isprev.get():
 		for ip in iplist:
-			ffmpeg[ip] = multiprocessing.Process(target=start_ffmpeg, args=(ip,))
+			ffmpeg[ip] = Process(target=start_ffmpeg, args=(ip,))
 			ffmpeg[ip].start()
 		send_cmd(stream_start)
 	else:
@@ -106,7 +108,7 @@ def preview():
 		elif pf == "Windows":
 			os.system('taskkill /F /IM ffplay.exe')
 		send_cmd(stream_stop)
-	
+
 def load_json(filename):
 	try:
 		f = file(cmd_file_name)
@@ -119,7 +121,7 @@ def load_json(filename):
 		show_message('json read failed\n' + str(e))
 		exit()
 	return js
-	
+
 def get_img():
 	path = tkFileDialog.askdirectory()
 	result = send_cmd(list_file)
@@ -131,13 +133,25 @@ def get_img():
 			filelist = json.loads(result[ip])
 			lastfile = filelist['media'][0]['fs'][-1]['n']
 			data = opener[ip].open(get_file_url+lastfile, timeout=5).read()
-			with open(subpath+lastfile, "wb") as code:     
+			with open(subpath+lastfile, "wb") as code:
 				code.write(data)
 		except Exception, e:
 			print str(e)
 			continue
-		
-	
+
+def start_server(conn):
+	s.listen(5)
+	ss, addr = s.accept()
+	print 'got connect from ', addr
+	while True:
+		ss.send(conn.recv())
+
+def start_client():
+	while True:
+		data = s.recv(512)
+		print data
+		send_cmd(data)
+
 # load json
 cmd_file_name = 'command.json'
 js = load_json(cmd_file_name)
@@ -148,8 +162,10 @@ try:
 	stream_stop = js['stream']['stop']
 	list_file = js['list_file']
 	get_file_url = js['file_path']
+	server_ip = js['server_ip']
+	isclient = js['isclient']
 except Exception, e:
-	show_message('columns_num and controls should be specified\n' + str(e))
+	show_message('insufficient parameters\n' + str(e))
 	exit()
 
 # get connected gopro
@@ -160,7 +176,6 @@ ffmpeg = {}
 
 # init gui
 root = Tk()
-root.title('gopro controller with %d gopros' % len(iplist))
 value = StringVar()
 i = 0
 cmd_dict = {}
@@ -178,6 +193,19 @@ for item in controls:
 	mb.grid(row = r, column = c)
 	i = i+1
 
+root.title('gopro controller with %d gopros (%s)' % (len(iplist), isclient))
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+address = (server_ip, 12345)
+if isclient == 'server':
+	s.bind(address)
+	parent_conn, child_conn = Pipe()
+	socket_proc = Process(target=start_server, args=(child_conn,))
+	socket_proc.start()
+else:
+	s.connect(address)
+	socket_proc = Process(target=start_client)
+	socket_proc.start()
+
 isprev = IntVar()
 cb = Checkbutton(root, text='preview', variable=isprev, \
 			onvalue = 1, offvalue = 0, command=preview)
@@ -185,8 +213,11 @@ cb.grid(row=i+1, column=0, columnspan=columns_num/2)
 bu = Button(root, text='get_last_img', command=get_img)
 bu.grid(row=i+1, column=columns_num/2, columnspan=columns_num/2)
 
+
 if __name__ == '__main__':
-	threading = multiprocessing.Process(target=keep_alive)
+	threading = Process(target=keep_alive)
 	threading.start()
 	root.mainloop()
 	threading.terminate()
+	s.close()
+	socket_proc.terminate()

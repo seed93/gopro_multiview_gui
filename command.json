@@ -1,5 +1,7 @@
 {
 	"columns_num": 4,
+	"server_ip": "10.0.0.67",
+	"isclient": "server",
 	"controls": [
 	{
 		"name": "Controls",
