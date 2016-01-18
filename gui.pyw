@@ -125,20 +125,31 @@ def load_json(filename):
 
 def get_img():
 	path = tkFileDialog.askdirectory()
+	if not path:
+		return
 	result = send_cmd(list_file)
+	num = int(edit.get())
+	if num <= 0:
+		show_message("number should be greater than zero")
+		return
 	for ip in result:
 		subpath = path+'/'+ip+'/'
 		if not os.path.exists(subpath):
 			os.mkdir(subpath)
 		try:
 			filelist = json.loads(result[ip])
-			lastfile = filelist['media'][0]['fs'][-1]['n']
-			data = opener[ip].open(get_file_url+lastfile, timeout=5).read()
-			with open(subpath+lastfile, "wb") as code:
-				code.write(data)
+			filelist = filelist['media'][0]['fs']
+			if num > len(filelist):
+				num = len(filelist)
+			for file in filelist[-num:]:
+				lastfile = [-1]['n']
+				data = opener[ip].open(get_file_url+lastfile, timeout=5).read()
+				with open(subpath+lastfile, "wb") as code:
+					code.write(data)
 		except Exception, e:
 			print str(e)
 			continue
+	show_message('get image done')
 
 def start_server(conn):
 	s.listen(5)
@@ -210,9 +221,11 @@ elif isclient == 'client':
 isprev = IntVar()
 cb = Checkbutton(root, text='preview', variable=isprev, \
 			onvalue = 1, offvalue = 0, command=preview)
-cb.grid(row=i+1, column=0, columnspan=columns_num/2)
+cb.grid(row=i+1, column=0)
+edit = Entry(root)
+edit.grid(row=i+1, column=1)
 bu = Button(root, text='get_last_img', command=get_img)
-bu.grid(row=i+1, column=columns_num/2, columnspan=columns_num/2)
+bu.grid(row=i+1, column=2)
 
 
 if __name__ == '__main__':
