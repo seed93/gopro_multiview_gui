@@ -1,7 +1,7 @@
 {
 	"columns_num": 4,
 	"server_ip": "10.0.0.67",
-	"isclient": "server",
+	"isclient": "",
 	"controls": [
 	{
 		"name": "Controls",
@@ -233,6 +233,21 @@
 	"list_file": "http://10.5.5.9:8080/gp/gpMediaList",
 	"file_path": "http://10.5.5.9:8080/videos/DCIM/100GOPRO/",
 	"mac_map": {
-		"GoproNumber1": ""
+		"GoproNumber1": "d4d91990386f",
+		"GoproNumber2": "d4d919923696",
+		"GoproNumber3": "d4d9199042c9",
+		"GoproNumber4": "d4d919924264",
+		"GoproNumber5": "d4d919904e4f",
+		"GoproNumber6": "d4d919924cd6",
+		"GoproNumber7": "d4d9199049f7",
+		"GoproNumber8": "d4d919901678",
+		"GoproNumber9": "d896855fd25e",
+		"GoproNumber10": "d4d919324832",
+		"GoproNumber11": "d896855fee9f",
+		"GoproNumber12": "d4d91931a350",
+		"GoproNumber13": "d4d91931598c",
+		"GoproNumber14": "d89685567197",
+		"GoproNumber15": "d4d919318c87",
+		"GoproNumber16": "d4d919319e11"
 	}
 }
