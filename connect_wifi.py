@@ -16,9 +16,9 @@ for line in all_interface.splitlines():
 
 print 'total %d interfaces' % len(interface_list)
 
-num = range(9, 17)
+num = range(1, 17)
 for i in range(0,len(interface_list)):
-	s = 'netsh wlan add profile filename="profile/GoproNumber%d.xml" interface="%s"' % (num[i], interface_list[i])
+	s = 'netsh wlan add profile filename="GoproNumber%d.xml" interface="%s"' % (num[i], interface_list[i])
 	os.system(s)
 	s = 'netsh wlan connect name="GoproNumber%d" interface="%s"' % (num[i], interface_list[i])
 	os.system(s)

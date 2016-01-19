@@ -11,7 +11,6 @@ from threading import Thread
 from time import sleep
 from multiprocessing import Process, Pipe
 import tkFileDialog
-import struct
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -85,7 +84,7 @@ def send_cmd(url):
 	result = {}
 	for ip in opener:
 		try:
-			result[ip] = opener[ip].open(url, timeout=2).read()
+			result[ip] = opener[ip].open(url, timeout=1).read()
 		except Exception, e:
 			print ip + " failed\n" + str(e)
 	return result
@@ -121,13 +120,10 @@ def wake_on_lan():
 			send_data = ''.join([send_data,
 								 struct.pack('B', int(data[i: i + 2], 16))])
 		# Broadcast it to the LAN.
-		try:
-			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-			sock.bind((ip,8080))
-			sock.sendto(send_data, ('10.5.5.9', 9))
-		except:
-			print ip, 'failed'
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+		sock.bind((ip,8080))
+		sock.sendto(send_data, ('10.5.5.9', 9))
 
 def power_change():
 	if ispower.get():
@@ -150,12 +146,6 @@ def load_json(filename):
 	return js
 
 def get_img():
-	'''
-	for ip in opener:
-		result = opener[ip].open('http://10.5.5.9/videos/MISC/version.txt', timeout=1).read()
-		print ip, result
-	return
-	'''
 	path = tkFileDialog.askdirectory()
 	if not path:
 		return
@@ -225,7 +215,7 @@ iplist = find_all_ip()
 print iplist
 ip_to_ssid = {}
 for ip in iplist:
-	ip_to_ssid[ip] = 'GoproNumber%d' % int(ip[-2:])
+	ip_to_ssid[ip] = 'GoproNumber%d',int(ip[-2:])
 opener = set_sender(iplist)
 ffmpeg = {}
 
@@ -269,8 +259,7 @@ power = Checkbutton(root, text='power', variable=ispower, \
 power.grid(row=i+1, column=3)
 
 if __name__ == '__main__':
-	if isclient:
-		socket_proc.start()
+	socket_proc.start()
 	threading = Process(target=keep_alive)
 	threading.start()
 	root.mainloop()

@@ -1,19 +1,8 @@
 ##Multiview and Control GUI of Gopro Hero 4
 
-This is a GUI for Gopro Hero 4.
+This is a GUI for Gopro Hero 4. Using multiple network adapters connected with each gopro, this program can take control of multiple gopros and enable live preview and file transfer.
 
-###Features
-
-* connect gopros with multiple PCs
-* liveview
-* file transfer
-* power on and off
-* most control methods
-* windows and linux supported
-
-A python script is given for connecting wifi and setting ip address under windows.
-
-Be sure that every connected gopro has an IP like 10.5.5.*.
+Be sure that every connected gopro has an IP like 10.5.5.* (this could be manually assigned).
 
 ![multi gro](http://i4.tietuku.com/bb840f6edbb6c704.jpg  "gopro")
 
