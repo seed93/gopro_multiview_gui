@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[116]:
-
 import subprocess, os, sys
 class WifiController():
     def __init__(self):
@@ -39,9 +34,11 @@ class WifiController():
                 name.append(interface['Name'])
         return name
     def QuickStat(self):
+        self.RegisterAllInterfaces()
         for interface in self.interfaces:
             if interface.has_key("SSID"):
-                print interface['Name']+' : '+interface['SSID']+'\n'
+                interface['IP'] = self.GetIpByName(interface['Name'])
+                print interface['Name']+' : '+interface['SSID']+'   '+interface['IP']+'\n'
             else:
                 print interface['Name']+' : '+interface['State']+'\n'
         return
@@ -50,7 +47,8 @@ class WifiController():
         print subprocess.Popen(s, stdout=subprocess.PIPE).stdout.read().decode('cp437')
         s = 'netsh wlan connect name="GoproNumber%d" interface="%s"' % (goproID, name)
         print subprocess.Popen(s, stdout=subprocess.PIPE).stdout.read().decode('cp437')
-        s = 'netsh interface ip set address name="%s" source=static             addr=10.5.5.%d mask=255.255.255.0 gateway=10.5.5.9' % (name, goproID+100)
+        s = 'netsh interface ip set address name="%s" source=static \
+            addr=10.5.5.%d mask=255.255.255.0 gateway=10.5.5.9' % (name, goproID+100)
         print subprocess.Popen(s, stdout=subprocess.PIPE).stdout.read().decode('cp437')
         self.RegisterAllInterfaces
     def GetConnectedGopros(self):
@@ -59,7 +57,17 @@ class WifiController():
             if(interface.has_key("SSID") and interface["SSID"].find('GoproNumber')>-1):
                 connectedgopros.append(int(interface["SSID"][11:]))
         return connectedgopros
+    def GetIpByName(self,name):
+        raw = subprocess.Popen('ipconfig', stdout=subprocess.PIPE).stdout.read().decode('cp437').split('\n')
+        iscurrent = False
+        for lines in raw:
+            if lines.find(name+":")>-1:
+                iscurrent = True
+            if lines.find('IPv4')>-1 and iscurrent == True:
+                ip =  lines[lines.find(':')+2:]
+                return ip
     def QuickConnect(self):
+        self.RegisterAllInterfaces()
         names = self.GetDisconnectedInterfaceName()
         onlinegp = self.GetConnectedGopros()
         offlinegp=[]
@@ -71,4 +79,3 @@ class WifiController():
         for i in range(0,len(names)):
             self.ConnectByName(names[i],offlinegp[i])
         return
-

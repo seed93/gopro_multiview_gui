@@ -232,11 +232,12 @@
 	"power_off": "http://10.5.5.9/gp/gpControl/command/system/sleep",
 	"list_file": "http://10.5.5.9:8080/gp/gpMediaList",
 	"file_path": "http://10.5.5.9:8080/videos/DCIM/100GOPRO/",
-	"mac_map": {
+	"mac_map": 
+	{
 		"GoproNumber1": "d4d91990386f",
 		"GoproNumber2": "d4d919923696",
 		"GoproNumber3": "d4d9199042c9",
-		"GoproNumber4": "d4d919924264",
+		"GoproNumber4": "d8968555d473",
 		"GoproNumber5": "d4d919904e4f",
 		"GoproNumber6": "d4d919924cd6",
 		"GoproNumber7": "d4d9199049f7",
@@ -248,8 +249,7 @@
 		"GoproNumber13": "d4d91931598c",
 		"GoproNumber14": "d89685567197",
 		"GoproNumber15": "d4d919318c87",
-		"GoproNumber16": "d4d919319e11"
-		
-		
+		"GoproNumber16": "d4d919319e11",
+		"GoproNumber17": "d4d919924264"
 	}
 }

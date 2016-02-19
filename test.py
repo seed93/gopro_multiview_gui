@@ -5,12 +5,13 @@
 
 from multiprocessing import Process, Pipe
 from CamArrayControl import *
+from time import sleep
 import socket
 def CameraArrayCommand_Parralell(camarrayopener,url):
     threading= []
     for iterid in range(0,len(camarrayopener)):
         print 'creating thread!\n'
-        threading.append(Process(target=SendCmd_test, args=(camarrayopener[iterid],url,iterid)))
+        threading.append(Process(target=SendCmd, args=(camarrayopener[iterid],url,iterid)))
         threading[iterid].start()
         print 'thread created!\n'
 def BuildCameraArrayOpener(camarray):
@@ -42,25 +43,27 @@ def StreamMultiCam(camarray):
         thread = Process(target=StartFFplay,args=(cam,))
         thread.start()
     
+def LoadJson(path):
+    with open(path,'r') as datasource:
+        data = json.load(datasource)
+    return data
+
 if __name__=='__main__':
-    print "enter"
     camarray = []
     for id in range(1,17):
-        camarray.append(Camera(id))
-    js = ReadJson('D:\gopro_multiview_gui')
-    cmddict = ConvertControlJson(js);
+        camarray.append(Camera(id,1))
+    #js = ReadJson('D:\gopro_multiview_gui')
+    cmddict = LoadJson('D:/gopro_multiview_gui/newcommand.json')
+    
     camarraycmd = CameraArrayCommand()
-    camarraycmd.RegisterMacs(camarray,js['mac_map'])
-    #camarraycmd.SetControl(camarray,cmddict['Primary modes']['MultiShot'])
-    #camarraycmd.SetControl(camarray,cmddict['Secondary modes']['Timelapse (MultiShot)'])
-    #camarraycmd.SetControl(camarray,cmddict['Timelapse Interval']['0.5'])
-    #camarraycmd.SetControl(camarray,cmddict['Photo resolution']['7MP Medi'])
-    #camarraycmd.SetControl(camarray,cmddict['Field Of View']['Medium'])
-    #camarraycmd.SetControl(camarray,cmddict['White Balance']['6500k'])
-    #camarraycmd.SetControl(camarray,cmddict['EV']['0'])
-    Thread = Process(target = KeepAlive,args=(camarray[0:4],))
-    Thread.start()
-    StreamMultiCam(camarray[0:4])
+    #f = open('D:\gopro_multiview_gui\command.json')
+    #cmddict = json.load(f)
+    #camarraycmd.RegisterMacs(camarray,js['mac_map'])
+    while(True):
+        for cam in camarray:
+            cam.SendUrlCmd(cmddict['GetStatus'])
+        sleep(1.5)
+        print "=================================================="
     # In[2]:
 
 
